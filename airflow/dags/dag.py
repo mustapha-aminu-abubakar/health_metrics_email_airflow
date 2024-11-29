@@ -25,14 +25,13 @@ cursor = connection.cursor()
 @dag(
     dag_id = 'generate_synthetic_health_metrics',
     default_args= default_args,
-    schedule_interval= timedelta(minutes= 15),
-    start_date= datetime(2024, 11, 29)
+    schedule_interval= '@daily',
+    start_date= datetime(2024, 11, 29, 14, 25)
 )
 def generate_synthetic_health_metrics():
 
     @task
-    def generte_metrics():
-        start_time = datetime.now().strftime('%Y-%m-%d %H:%M')
+    def generate_metrics():
         data = [
             {
                 "id": fake.random.randint(1, 5),
@@ -53,19 +52,23 @@ def generate_synthetic_health_metrics():
             INSERT INTO health_metrics.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """            
 
-        data_tuples = [(record['id'], 
-                   record['date_time'], 
-                   record['heart_rate'], 
-                   record['blood_oxygen'], 
-                   record['steps_count'], 
-                   record['calories_burned'], 
-                   record['sleep_duration'], 
-                   record['stress_level'], 
-                   record['body_temperature'], 
-                   record['activity_level']) for record in data]
+        data_tuples = [(
+                    record['id'], 
+                    record['date_time'], 
+                    record['heart_rate'], 
+                    record['blood_oxygen'], 
+                    record['steps_count'], 
+                    record['calories_burned'], 
+                    record['sleep_duration'], 
+                    record['stress_level'], 
+                    record['body_temperature'], 
+                    record['activity_level']) for record in data]
 
         cursor.executemany(insert_query, data_tuples)
 
         connection.commit()
         cursor.close()
         connection.close()
+
+    generate_metrics = generate_metrics()
+generate_synthetic_health_metrics = generate_synthetic_health_metrics()
