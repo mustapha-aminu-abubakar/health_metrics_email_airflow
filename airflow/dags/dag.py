@@ -45,7 +45,7 @@ def generate_synthetic_health_metrics():
                 "body_temperature": round(fake.random.uniform(36.0, 37.5), 1),  # Celsius
                 "activity_level": fake.random.choice(["low", "moderate", "high"])
             }
-            for _ in range(350)
+            for _ in range(1000)
         ]
 
         insert_query = """
