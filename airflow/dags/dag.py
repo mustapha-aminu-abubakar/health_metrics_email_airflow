@@ -3,6 +3,7 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime, timedelta
 import mysql.connector
 from faker import Faker
+import csv
 
 
 default_args = {
@@ -19,6 +20,8 @@ connection = mysql.connector.connect(
 
 fake = Faker()
 
+cursor = connection.cursor()
+
 @dag(
     dag_id = 'generate_synthetic_health_metrics',
     default_args= default_args,
@@ -30,7 +33,7 @@ def generate_synthetic_health_metrics():
     @task
     def generte_metrics():
         start_time = datetime.now().strftime('%Y-%m-%d %H:%M')
-        [
+        data = [
             {
                 "id": fake.random.randint(1, 5),
                 "date_time": fake.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()),
@@ -45,5 +48,24 @@ def generate_synthetic_health_metrics():
             }
             for _ in range(350)
         ]
-            
-    
+
+        insert_query = """
+            INSERT INTO health_metrics.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """            
+
+        data_tuples = [(record['id'], 
+                   record['date_time'], 
+                   record['heart_rate'], 
+                   record['blood_oxygen'], 
+                   record['steps_count'], 
+                   record['calories_burned'], 
+                   record['sleep_duration'], 
+                   record['stress_level'], 
+                   record['body_temperature'], 
+                   record['activity_level']) for record in data]
+
+        cursor.executemany(insert_query, data_tuples)
+
+        connection.commit()
+        cursor.close()
+        connection.close()
