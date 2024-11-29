@@ -7,8 +7,8 @@ import csv
 
 
 default_args = {
-    'retries': 2,
-    'retry_delay': timedelta(minutes=5)
+    'retries': 3,
+    'retry_delay': timedelta(minutes=1)
 }
 
 connection = mysql.connector.connect(
@@ -25,7 +25,7 @@ cursor = connection.cursor()
 @dag(
     dag_id = 'generate_synthetic_health_metrics',
     default_args= default_args,
-    schedule_interval= '@daily',
+    schedule_interval= timedelta(minutes= 15),
     start_date= datetime(2024, 11, 29, 14, 25)
 )
 def generate_synthetic_health_metrics():
