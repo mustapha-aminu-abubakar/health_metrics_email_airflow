@@ -32,17 +32,18 @@ def generate_synthetic_health_metrics():
         start_time = datetime.now().strftime('%Y-%m-%d %H:%M')
         [
             {
-                "heart_rate": fake.randint(50, 100),  # beats per minute
-                "blood_oxygen": round(fake.uniform(95, 100), 1),  # percentage
-                "steps_count": fake.randint(0, 20000),  # steps
-                "calories_burned": round(fake.uniform(100, 1000), 2),  # kcal
-                "sleep_duration": round(fake.uniform(4, 10), 2),  # hours
-                "stress_level": fake.randint(1, 10),  # scale of 1 to 10
-                "body_temperature": round(fake.uniform(36.0, 37.5), 1),  # Celsius
-                "activity_level": fake.choice(["low", "moderate", "high"]),
-                "date_time": start_time + timedelta(minutes = 15) 
+                "id": fake.random.randint(1, 5),
+                "date_time": fake.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()),
+                "heart_rate": fake.random.randint(50, 100),  # beats per minute
+                "blood_oxygen": round(fake.random.uniform(95, 100), 1),  # percentage
+                "steps_count": fake.random.randint(0, 20000),  # steps
+                "calories_burned": round(fake.random.uniform(100, 1000), 2),  # kcal
+                "sleep_duration": round(fake.random.uniform(4, 10), 2),  # hours
+                "stress_level": fake.random.randint(1, 10),  # scale of 1 to 10
+                "body_temperature": round(fake.random.uniform(36.0, 37.5), 1),  # Celsius
+                "activity_level": fake.random.choice(["low", "moderate", "high"])
             }
-            for _ in range(50)
+            for _ in range(350)
         ]
             
     
