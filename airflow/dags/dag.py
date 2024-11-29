@@ -35,7 +35,7 @@ def generate_synthetic_health_metrics():
         data = [
             {
                 "id": fake.random.randint(1, 5),
-                "date_time": fake.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()),
+                "date_time": fake.unique.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()),
                 "heart_rate": fake.random.randint(50, 100),  # beats per minute
                 "blood_oxygen": round(fake.random.uniform(95, 100), 1),  # percentage
                 "steps_count": fake.random.randint(0, 20000),  # steps
