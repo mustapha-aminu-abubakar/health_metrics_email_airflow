@@ -15,7 +15,7 @@ connection = mysql.connector.connect(
     host="localhost",       
     user="admin",  
     password="1234",  
-    database="health_metrics" 
+    database="health_metrics_2" 
 )
 
 fake = Faker()
@@ -26,7 +26,7 @@ cursor = connection.cursor()
     dag_id = 'generate_synthetic_health_metrics',
     default_args= default_args,
     schedule_interval= timedelta(minutes= 15),
-    start_date= datetime(2024, 11, 29, 14, 25)
+    start_date= datetime(2024, 12, 1)
 )
 def generate_synthetic_health_metrics():
 
