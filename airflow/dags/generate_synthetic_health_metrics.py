@@ -30,37 +30,37 @@ cursor = connection.cursor()
 )
 def generate_synthetic_health_metrics():
 
-    # @task
-    # def generate_users():
-    #     users = [
-    #         {
-    #             "user_id": i,
-    #             "first_name": fake.first_name(),
-    #             "last_name": fake.last_name(),
-    #             "age": fake.random.randint(22,50),
-    #             "gender": fake.random.choice(['male', 'female', 'others']),
-    #             "email": fake.unique.email()
-    #         }
-    #         for i in range(5)
-    #     ]
-    #     insert_query="""
-    #     INSERT INTO users VALUES(%s, %s, %s, %s, %s, %s)
-    #     """
+    @task
+    def generate_users():
+        users = [
+            {
+                "user_id": i,
+                "first_name": fake.first_name(),
+                "last_name": fake.last_name(),
+                "age": fake.random.randint(22,50),
+                "gender": fake.random.choice(['male', 'female', 'others']),
+                "email": fake.unique.email()
+            }
+            for i in range(5)
+        ]
+        insert_query="""
+        INSERT INTO users VALUES(%s, %s, %s, %s, %s, %s)
+        """
 
-    #     users_tuples=[(
-    #         user['user_id'],
-    #         user['first_name'],
-    #         user['last_name'],
-    #         user['age'],
-    #         user['gender'],
-    #         user['email']
-    #     ) for user in users]
+        users_tuples=[(
+            user['user_id'],
+            user['first_name'],
+            user['last_name'],
+            user['age'],
+            user['gender'],
+            user['email']
+        ) for user in users]
 
-    #     cursor.executemany(insert_query, users_tuples)
+        cursor.executemany(insert_query, users_tuples)
 
-    #     connection.commit()
-    #     cursor.close()
-    #     connection.close()
+        connection.commit()
+        cursor.close()
+        connection.close()
 
 
 
@@ -104,8 +104,8 @@ def generate_synthetic_health_metrics():
         cursor.close()
         connection.close()
 
-    # generate_users = generate_users()
+    generate_users = generate_users()
     generate_metrics = generate_metrics()
 
-    # generate_users >> generate_metrics
+    [generate_users, generate_metrics]
 generate_synthetic_health_metrics = generate_synthetic_health_metrics()
