@@ -25,16 +25,50 @@ cursor = connection.cursor()
 @dag(
     dag_id = 'generate_synthetic_health_metrics',
     default_args= default_args,
-    schedule_interval= timedelta(minutes= 15),
+    schedule_interval= '@daily',
     start_date= datetime(2024, 12, 1)
 )
 def generate_synthetic_health_metrics():
 
     @task
+    def generate_users():
+        users = [
+            {
+                "user_id": i,
+                "first_name": fake.first_name(),
+                "last_name": fake.last_name(),
+                "age": fake.random.randint(22,50),
+                "gender": fake.random.choice(['male', 'female', 'others']),
+                "email": fake.unique.email()
+            }
+            for i in range(5)
+        ]
+        insert_query="""
+        INSERT INTO users VALUES(%s, %s, %s, %s, %s, %s)
+        """
+
+        users_tuples=[(
+            user['user_id'],
+            user['first_name'],
+            user['last_name'],
+            user['age'],
+            user['gender'],
+            user['email']
+        ) for user in users]
+
+        cursor.executemany(insert_query, users_tuples)
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+
+
+    @task
     def generate_metrics():
         data = [
             {
-                "id": fake.random.randint(1, 5),
+                "user_id": fake.random.randint(1, 3),
                 "date_time": fake.unique.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()),
                 "heart_rate": fake.random.randint(50, 100),  # beats per minute
                 "blood_oxygen": round(fake.random.uniform(95, 100), 1),  # percentage
@@ -53,7 +87,7 @@ def generate_synthetic_health_metrics():
         """            
 
         data_tuples = [(
-                    record['id'], 
+                    record['user_id'], 
                     record['date_time'], 
                     record['heart_rate'], 
                     record['blood_oxygen'], 
@@ -70,5 +104,8 @@ def generate_synthetic_health_metrics():
         cursor.close()
         connection.close()
 
+    generate_users = generate_users()
     generate_metrics = generate_metrics()
+
+    generate_users >> generate_metrics
 generate_synthetic_health_metrics = generate_synthetic_health_metrics()
