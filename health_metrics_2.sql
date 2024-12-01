@@ -2,7 +2,7 @@ CREATE DATABASE IF NOT EXISTS health_metrics_2 DEFAULT CHARSET = 'utf8mb4';
 USE health_metrics_2;
 
 CREATE TABLE IF NOT EXISTS users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT AUTO_INCREMENT,
     first_name NVARCHAR(50),
     last_name NVARCHAR(50),
     age INT,
@@ -21,8 +21,6 @@ CREATE TABLE IF NOT EXISTS metrics (
     stress_level INT,
     body_temperature FLOAT(7,2),
     activity_level FLOAT(7,2),
-    PRIMARY KEY (user_id, date_time),
-    Foreign Key (user_id) REFERENCES health_metrics_2.users(user_id)
 );
 
 

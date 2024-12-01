@@ -34,7 +34,6 @@ def generate_synthetic_health_metrics():
     # def generate_users():
     #     users = [
     #         {
-    #             "user_id": i,
     #             "first_name": fake.first_name(),
     #             "last_name": fake.last_name(),
     #             "age": fake.random.randint(22,50),
@@ -44,11 +43,10 @@ def generate_synthetic_health_metrics():
     #         for i in range(5)
     #     ]
     #     insert_query="""
-    #     INSERT INTO health_metrics_2.users VALUES(%s, %s, %s, %s, %s, %s)
+    #     INSERT INTO health_metrics_2.users(first_name, last_name, age, gender, email) VALUES(%s, %s, %s, %s, %s)
     #     """
 
     #     users_tuples=[(
-    #         user['user_id'],
     #         user['first_name'],
     #         user['last_name'],
     #         user['age'],
@@ -69,7 +67,7 @@ def generate_synthetic_health_metrics():
         data = [
             {
                 "user_id": fake.random.randint(1, 6),
-                "date_time": fake.unique.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()).strftime('%Y-%m-%d %H:%M'),
+                "date_time": fake.unique.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()),
                 "heart_rate": fake.random.randint(50, 100),  # beats per minute
                 "blood_oxygen": round(fake.random.uniform(95, 100), 1),  # percentage
                 "steps_count": fake.random.randint(0, 20000),  # steps
