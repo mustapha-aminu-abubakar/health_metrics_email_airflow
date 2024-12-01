@@ -7,7 +7,7 @@ import csv
 
 
 default_args = {
-    'retries': 3,
+    'retries': 1,
     'retry_delay': timedelta(minutes=1)
 }
 
