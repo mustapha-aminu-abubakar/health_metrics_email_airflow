@@ -44,7 +44,7 @@ def generate_synthetic_health_metrics():
             for i in range(5)
         ]
         insert_query="""
-        INSERT INTO users VALUES(%s, %s, %s, %s, %s, %s)
+        INSERT INTO health_metrics_2.users VALUES(%s, %s, %s, %s, %s, %s)
         """
 
         users_tuples=[(
@@ -68,8 +68,8 @@ def generate_synthetic_health_metrics():
     def generate_metrics():
         data = [
             {
-                "user_id": fake.random.randint(1, 3),
-                "date_time": fake.unique.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()),
+                "user_id": fake.random.randint(1, 6),
+                "date_time": fake.unique.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()).strfime('%Y-%m-%d %H:%M'),
                 "heart_rate": fake.random.randint(50, 100),  # beats per minute
                 "blood_oxygen": round(fake.random.uniform(95, 100), 1),  # percentage
                 "steps_count": fake.random.randint(0, 20000),  # steps
@@ -79,11 +79,11 @@ def generate_synthetic_health_metrics():
                 "body_temperature": round(fake.random.uniform(36.0, 37.5), 1),  # Celsius
                 "activity_level": fake.random.choice(["low", "moderate", "high"])
             }
-            for _ in range(1000)
+            for _ in range(200)
         ]
 
         insert_query = """
-            INSERT INTO health_metrics.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO health_metrics_2.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """            
 
         data_tuples = [(
@@ -107,5 +107,4 @@ def generate_synthetic_health_metrics():
     generate_users = generate_users()
     generate_metrics = generate_metrics()
 
-    [generate_users, generate_metrics]
 generate_synthetic_health_metrics = generate_synthetic_health_metrics()
