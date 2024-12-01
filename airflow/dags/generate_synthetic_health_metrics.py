@@ -30,37 +30,37 @@ cursor = connection.cursor()
 )
 def generate_synthetic_health_metrics():
 
-    @task
-    def generate_users():
-        users = [
-            {
-                "user_id": i,
-                "first_name": fake.first_name(),
-                "last_name": fake.last_name(),
-                "age": fake.random.randint(22,50),
-                "gender": fake.random.choice(['male', 'female', 'others']),
-                "email": fake.unique.email()
-            }
-            for i in range(5)
-        ]
-        insert_query="""
-        INSERT INTO health_metrics_2.users VALUES(%s, %s, %s, %s, %s, %s)
-        """
+    # @task
+    # def generate_users():
+    #     users = [
+    #         {
+    #             "user_id": i,
+    #             "first_name": fake.first_name(),
+    #             "last_name": fake.last_name(),
+    #             "age": fake.random.randint(22,50),
+    #             "gender": fake.random.choice(['male', 'female', 'others']),
+    #             "email": fake.unique.email()
+    #         }
+    #         for i in range(5)
+    #     ]
+    #     insert_query="""
+    #     INSERT INTO health_metrics_2.users VALUES(%s, %s, %s, %s, %s, %s)
+    #     """
 
-        users_tuples=[(
-            user['user_id'],
-            user['first_name'],
-            user['last_name'],
-            user['age'],
-            user['gender'],
-            user['email']
-        ) for user in users]
+    #     users_tuples=[(
+    #         user['user_id'],
+    #         user['first_name'],
+    #         user['last_name'],
+    #         user['age'],
+    #         user['gender'],
+    #         user['email']
+    #     ) for user in users]
 
-        cursor.executemany(insert_query, users_tuples)
+    #     cursor.executemany(insert_query, users_tuples)
 
-        connection.commit()
-        cursor.close()
-        connection.close()
+    #     connection.commit()
+    #     cursor.close()
+    #     connection.close()
 
 
 
@@ -69,7 +69,7 @@ def generate_synthetic_health_metrics():
         data = [
             {
                 "user_id": fake.random.randint(1, 6),
-                "date_time": fake.unique.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()).strfime('%Y-%m-%d %H:%M'),
+                "date_time": fake.unique.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()).strftime('%Y-%m-%d %H:%M'),
                 "heart_rate": fake.random.randint(50, 100),  # beats per minute
                 "blood_oxygen": round(fake.random.uniform(95, 100), 1),  # percentage
                 "steps_count": fake.random.randint(0, 20000),  # steps
@@ -77,7 +77,7 @@ def generate_synthetic_health_metrics():
                 "sleep_duration": round(fake.random.uniform(4, 10), 2),  # hours
                 "stress_level": fake.random.randint(1, 10),  # scale of 1 to 10
                 "body_temperature": round(fake.random.uniform(36.0, 37.5), 1),  # Celsius
-                "activity_level": fake.random.choice(["low", "moderate", "high"])
+                "activity_level": fake.random.choice([0, 0.5, 1])
             }
             for _ in range(200)
         ]
@@ -104,7 +104,7 @@ def generate_synthetic_health_metrics():
         cursor.close()
         connection.close()
 
-    generate_users = generate_users()
+    # generate_users = generate_users()
     generate_metrics = generate_metrics()
 
 generate_synthetic_health_metrics = generate_synthetic_health_metrics()

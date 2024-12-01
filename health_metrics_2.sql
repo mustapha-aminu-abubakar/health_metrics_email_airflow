@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS metrics (
     body_temperature FLOAT(7,2),
     activity_level FLOAT(7,2),
     PRIMARY KEY (user_id, date_time),
-    Foreign Key (user_id) REFERENCES users(user_id)
+    Foreign Key (user_id) REFERENCES health_metrics_2.users(user_id)
 );
 
 
