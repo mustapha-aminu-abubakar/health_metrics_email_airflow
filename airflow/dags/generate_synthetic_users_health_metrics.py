@@ -134,7 +134,8 @@ with DAG(
         python_callable= generate_metrics
     )
 
-    
+    start_mysql >> import_db >> [generate_users_task, generate_metrics_taks]
+
 
 
 
