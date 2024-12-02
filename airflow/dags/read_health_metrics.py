@@ -58,7 +58,7 @@ def read_health_metrics():
         
         subject = "Your Daily Health Metrics"
         body = f"""
-        Hello,
+        Hello {metrics['first_name']},
 
         Here are your aggregated health metrics for the day:
         - Average Heart Rate: {metrics['avg_heart_rate']}, {metrics['avg_heart_rate_percent_change']} change from yesterday
@@ -87,7 +87,7 @@ def read_health_metrics():
             print(f"email successfully sent to {to_email}") if not response else print(f"email to {to_email} failed")
 
 
-    # read_health_metrics_task = read_health_metrics_task()
-# read_health_metrics = read_health_metrics()
+    read_health_metrics_task = read_health_metrics_task()
+read_health_metrics = read_health_metrics()
 
         
