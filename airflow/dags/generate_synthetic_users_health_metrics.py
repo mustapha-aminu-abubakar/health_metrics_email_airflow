@@ -19,13 +19,11 @@ mysql_cred = {
     "port": 3306,
     "host": "localhost",
     "password": "1234",  
-    "database": "health_metrics_3"
 }
 
 connection = mysql.connector.connect(
-      user= mysql_cred['user'],
+      user= mysql_cred['username'],
       password= mysql_cred['password'],
-      database = mysql_cred['database']
 )
 
 cursor = connection.cursor()
@@ -45,7 +43,7 @@ def generate_users(ti, users_count):
         for i in range(users_count)
     ]
     insert_query="""
-    INSERT INTO health_metrics_3.users(first_name, last_name, age, gender, email) VALUES(%s, %s, %s, %s, %s)
+    INSERT INTO health_metrics_4.users(first_name, last_name, age, gender, email) VALUES(%s, %s, %s, %s, %s)
     """
 
     users_tuples=[(
@@ -85,7 +83,7 @@ def generate_metrics(ti):
     ]
 
     insert_query = """
-        INSERT INTO health_metrics_3.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO health_metrics_4.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """            
 
     data_tuples = [(
@@ -120,7 +118,7 @@ with DAG(
 
     import_db = BashOperator(
         task_id= "import_db",
-        bash_command= f"sudo mysql -h {mysql_cred['host']} -P {mysql_cred['port']} -u {mysql_cred['username']} -p < health_metrics_3.sql"
+        bash_command= f"sudo mysql < /workspaces/weatherman_workflow/health_metrics_3.sql"
     )
 
     generate_users_task = PythonOperator(
