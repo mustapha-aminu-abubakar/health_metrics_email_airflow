@@ -15,7 +15,7 @@ connection = mysql.connector.connect(
     database = "health_metrics_3"
 )
 
-cursor = connection.cursor()
+cursor = connection.cursor(dictionary=True)
 
 @dag(
     dag_id = "read_health_metrics",
@@ -28,17 +28,19 @@ def read_health_metrics():
 
     @task()
     def read_health_metrics_task():
-        
+
+        reports = {}
         try:
             cursor.callproc('agg_metrics')
 
             for result in cursor.stored_results():
                 rows = result.fetchall()
                 for row in rows:
-                    print(row)
+                    reports[row['user_id']] = row
         except Exception as e:
             print(e)
         finally:
+            print(reports)
             cursor.close()
             connection.close()
 
