@@ -82,7 +82,9 @@ def read_health_metrics():
         with smtplib.SMTP(server, port) as server:
             server.starttls()
             server.login(username, password)
-            server.send_message(msg)
+            response = server.send_message(msg)
+
+            print(f"email successfully sent to {to_email}") if not response else print(f"email to {to_email} failed")
 
 
     # read_health_metrics_task = read_health_metrics_task()
