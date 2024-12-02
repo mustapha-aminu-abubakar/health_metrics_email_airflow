@@ -54,7 +54,7 @@ def read_health_metrics():
             print(f"send_email task error {e}")
 
     @task
-    def send_email(to_email, metrics, server, port, username, password):
+    def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username= "amustee22@gmail.com", password= "mjtogcqrrttddusp"):
         
         subject = "Your Daily Health Metrics"
         body = f"""
