@@ -27,24 +27,21 @@ def read_health_metrics():
 
     @task()
     def read_health_metrics_task():
-        read_query = """
-        CALL agg_metrics()
-        """
+        
+        try:
+            cursor.callproc('agg_metrics')
 
-    try:
-        cursor.callproc('agg_metrics')
+            for result in cursor.stored_results():
+                rows = result.fetchall()
+                for row in rows:
+                    print(row)
+        except Exception as e:
+            print(e)
+        finally:
+            cursor.close()
+            connection.close()
 
-        for result in cursor.stored_results():
-            rows = result.fetchall()
-            for row in rows:
-                print(row)
-    except Exception as e:
-        print(e)
-    finally:
-        cursor.close()
-        connection.close()
-
-        read_health_metrics_task = read_health_metrics_task()
+    read_health_metrics_task = read_health_metrics_task()
 read_health_metrics = read_health_metrics()
 
         
