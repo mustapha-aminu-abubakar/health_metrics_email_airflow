@@ -15,7 +15,7 @@ connection = mysql.connector.connect(
     host="localhost",       
     user="admin",  
     password="1234",  
-    database="health_metrics_2" 
+    database="health_metrics_3" 
 )
 
 fake = Faker()
@@ -26,39 +26,40 @@ cursor = connection.cursor()
     dag_id = 'generate_synthetic_health_metrics',
     default_args= default_args,
     schedule_interval= '@daily',
-    start_date= datetime(2024, 12, 1)
+    start_date= datetime(2024, 12, 1),
+    catchup = False
 )
 def generate_synthetic_health_metrics():
 
-    # @task
-    # def generate_users():
-    #     users = [
-    #         {
-    #             "first_name": fake.first_name(),
-    #             "last_name": fake.last_name(),
-    #             "age": fake.random.randint(22,50),
-    #             "gender": fake.random.choice(['male', 'female', 'others']),
-    #             "email": fake.unique.email()
-    #         }
-    #         for i in range(5)
-    #     ]
-    #     insert_query="""
-    #     INSERT INTO health_metrics_2.users(first_name, last_name, age, gender, email) VALUES(%s, %s, %s, %s, %s)
-    #     """
+    @task
+    def generate_users():
+        users = [
+            {
+                "first_name": fake.first_name(),
+                "last_name": fake.last_name(),
+                "age": fake.random.randint(22,50),
+                "gender": fake.random.choice(['male', 'female', 'others']),
+                "email": fake.unique.email()
+            }
+            for i in range(5)
+        ]
+        insert_query="""
+        INSERT INTO health_metrics_3.users(first_name, last_name, age, gender, email) VALUES(%s, %s, %s, %s, %s)
+        """
 
-    #     users_tuples=[(
-    #         user['first_name'],
-    #         user['last_name'],
-    #         user['age'],
-    #         user['gender'],
-    #         user['email']
-    #     ) for user in users]
+        users_tuples=[(
+            user['first_name'],
+            user['last_name'],
+            user['age'],
+            user['gender'],
+            user['email']
+        ) for user in users]
 
-    #     cursor.executemany(insert_query, users_tuples)
+        cursor.executemany(insert_query, users_tuples)
 
-    #     connection.commit()
-    #     cursor.close()
-    #     connection.close()
+        connection.commit()
+        cursor.close()
+        connection.close()
 
 
 
@@ -81,7 +82,7 @@ def generate_synthetic_health_metrics():
         ]
 
         insert_query = """
-            INSERT INTO health_metrics_2.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO health_metrics_3.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """            
 
         data_tuples = [(
@@ -102,7 +103,7 @@ def generate_synthetic_health_metrics():
         cursor.close()
         connection.close()
 
-    # generate_users = generate_users()
+    generate_users = generate_users()
     generate_metrics = generate_metrics()
 
 generate_synthetic_health_metrics = generate_synthetic_health_metrics()

@@ -12,16 +12,17 @@ connection = mysql.connector.connect(
     host="localhost",
     user = "admin",
     password = "1234",
-    database = "health_metrics_2"
+    database = "health_metrics_3"
 )
 
 cursor = connection.cursor()
 
 @dag(
     dag_id = "read_health_metrics",
-    start_date = datetime(2024, 12, 1),
+    start_date = datetime(2024, 12, 2),
     default_args = default_args,
-    schedule_interval = "@daily"
+    schedule_interval = "@daily",
+    catchup = False
 )
 def read_health_metrics():
 
