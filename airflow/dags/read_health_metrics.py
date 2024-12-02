@@ -18,6 +18,7 @@ connection = mysql.connector.connect(
 
 cursor = connection.cursor(dictionary=True)
 
+
 @dag(
     dag_id = "read_health_metrics",
     start_date = datetime(2024, 12, 2),
@@ -48,13 +49,13 @@ def read_health_metrics():
 
         try:
             for email, metrics in reports.items():
-                # send_email(email, metrics)
-                pass
+                send_email(email, metrics)
         except Exception as e:
             print(f"send_email task error {e}")
 
     @task
     def send_email(to_email, metrics, server, port, username, password):
+        
         subject = "Your Daily Health Metrics"
         body = f"""
         Hello,
@@ -78,13 +79,10 @@ def read_health_metrics():
         msg['From'] = username
         msg['To'] = to_email
 
-    with smtplib.SMTP(server, port) as server:
-        server.starttls()
-        server.login(username, password)
-        server.send_message(msg)
-
-
-
+        with smtplib.SMTP(server, port) as server:
+            server.starttls()
+            server.login(username, password)
+            server.send_message(msg)
 
 
     # read_health_metrics_task = read_health_metrics_task()
