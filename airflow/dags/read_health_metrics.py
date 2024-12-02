@@ -28,32 +28,6 @@ cursor = connection.cursor(dictionary=True)
 )
 def read_health_metrics():
 
-    @task()
-    def read_health_metrics_task():
-
-        reports = {}
-        try:
-            cursor.callproc('agg_metrics')
-
-            for result in cursor.stored_results():
-                rows = result.fetchall()
-                for row in rows:
-                    reports[row['email']] = row
-
-        except Exception as e:
-            print(f"read_health_metrics_task error: {e}")
-        finally:
-            print(reports)
-            cursor.close()
-            connection.close()
-
-        try:
-            for email, metrics in reports.items():
-                send_email(email, metrics)
-        except Exception as e:
-            print(f"send_email task error {e}")
-
-    @task
     def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username= "amustee22@gmail.com", password= "mjtogcqrrttddusp"):
         
         subject = "Your Daily Health Metrics"
@@ -80,6 +54,7 @@ def read_health_metrics():
         msg['To'] = to_email
 
         with smtplib.SMTP(server, port) as server:
+            print(f"sending email to {to_email}")
             server.starttls()
             server.login(username, password)
             response = server.send_message(msg)
@@ -87,6 +62,32 @@ def read_health_metrics():
             print(f"email successfully sent to {to_email}") if not response else print(f"email to {to_email} failed")
 
 
+    @task()
+    def read_health_metrics_task():
+
+        reports = {}
+        try:
+            cursor.callproc('agg_metrics')
+
+            for result in cursor.stored_results():
+                rows = result.fetchall()
+                for row in rows:
+                    reports[row['email']] = row
+
+        except Exception as e:
+            print(f"read_health_metrics_task error: {e}")
+        finally:
+            print(reports)
+            cursor.close()
+            connection.close()
+
+        try:
+            for email, metrics in reports.items():
+                send_email(email, metrics)
+        except Exception as e:
+            print(f"send_email task error {e}")
+
+    
     read_health_metrics_task = read_health_metrics_task()
 read_health_metrics = read_health_metrics()
 
