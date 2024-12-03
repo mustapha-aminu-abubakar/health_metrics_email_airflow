@@ -16,22 +16,37 @@ default_args = {
     "retry_delay": timedelta(minutes=1)
 }
 
-mysql_cred = {
-    "username": "admin",
-    "port": 3306,
-    "host": "localhost",
-    "password": "1234",  
-}
+# mysql_cred = {
+#     "username": "admin",
+#     "port": 3306,
+#     "host": "localhost",
+#     "password": "1234",  
+# }
 
-connection = mysql.connector.connect(
-      user= mysql_cred['username'],
-      password= mysql_cred['password'],
-)
+# connection = mysql.connector.connect(
+#       user= mysql_cred['username'],
+#       password= mysql_cred['password'],
+# )
 
-cursor = connection.cursor(dictionary=True)
+# cursor = connection.cursor(dictionary=True)
+connection, cursor = None
+
+def mysql_login(user= "admin", password= 1234):
+    try:
+        global connection, cursor
+        connection = mysql.connector.connect(
+        user= user,
+        password= password
+        )
+
+        cursor = connection.cursor(dictionary= True)
+    except Exception as e:
+        print(f"mysql.connect failed: {e}")
 
 
 def generate_users(users_count):
+
+    global connection, cursor
 
     users = [
         {
@@ -63,6 +78,8 @@ def generate_users(users_count):
 
 
 def generate_metrics(users_count):
+
+    global connection, cursor
 
     data = [
         {
@@ -120,7 +137,7 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
 
         Best regards,
         Abubakar Mustapha Aminu
-        """.center(10)
+        """.ljust()
 
         # Create and send the email
         msg = MIMEText(body)
@@ -141,6 +158,8 @@ def read_health_metrics_task():
 
     reports = {}
     try:
+        global connection
+        global cursor
         cursor.execute("USE health_metrics_4")
         cursor.execute("UPDATE health_metrics_4.users SET email = 'amustee22@gmail.com' WHERE user_id = 1")
         cursor.callproc('health_metrics_4.agg_metrics')
@@ -176,7 +195,17 @@ with DAG(
     default_args= default_args,
     catchup= False
 ) as dag:
- 
+    
+    start_mysql = BashOperator(
+        task_id = "start_mysql",
+        bash_command= "sudo service mysql start"
+    )
+
+    mysql_login_task = PythonOperator(
+        task_id= "mysql_login",
+        python_callable= mysql_login
+    )
+
     import_db = MySqlOperator(
         task_id= "import_db",
         mysql_conn_id='mysql_u_admin',
@@ -202,7 +231,7 @@ with DAG(
     )
 
 
-    import_db >> [generate_users_task, generate_metrics_taks] >> send_emails
+    start_mysql >> import_db >> [generate_users_task, generate_metrics_taks] >> send_emails
 
 
 
