@@ -24,9 +24,7 @@ CREATE TABLE IF NOT EXISTS metrics (
 );
 
 
-DELIMITER $$
-
-DROP PROCEDURE IF EXISTS agg_metrics$$
+DROP PROCEDURE IF EXISTS agg_metrics;
 
 CREATE PROCEDURE agg_metrics()
 BEGIN
@@ -91,9 +89,8 @@ BEGIN
         WHERE `date` = (SELECT MAX(DATE(date_time)) FROM health_metrics_4.metrics)
     )
     SELECT * FROM metrics_latest LEFT JOIN health_metrics_4.users ON metrics_latest.user_id = users.user_id;
-END $$
+END 
 
-DELIMITER ;
 
 
 
