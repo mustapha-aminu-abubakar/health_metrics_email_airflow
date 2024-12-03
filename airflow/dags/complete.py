@@ -28,7 +28,7 @@ connection = mysql.connector.connect(
       password= mysql_cred['password'],
 )
 
-cursor = connection.cursor()
+cursor = connection.cursor(dictionary=True)
 
 
 def generate_users(users_count):
@@ -39,7 +39,7 @@ def generate_users(users_count):
             "last_name": fake.last_name(),
             "age": fake.random.randint(22,50),
             "gender": fake.random.choice(['male', 'female', 'others']),
-            "email": "amustee22@gmail.com"
+            "email": fake.email()
         }
         for i in range(users_count)
     ]
@@ -58,15 +58,15 @@ def generate_users(users_count):
     cursor.executemany(insert_query, users_tuples)
 
     connection.commit()
-    cursor.close()
-    connection.close()
+
+    print(f"users generated successfully, sample: {users[0]}")
 
 
 def generate_metrics(users_count):
 
     data = [
         {
-            "user_id": fake.random.randint(1, 6),
+            "user_id": fake.random.randint(1, users_count),
             "date_time": fake.unique.date_time_between_dates(datetime.today() - timedelta(days=3), datetime.today()),
             "heart_rate": fake.random.randint(50, 100),  # beats per minute
             "blood_oxygen": round(fake.random.uniform(95, 100), 1),  # percentage
@@ -99,8 +99,8 @@ def generate_metrics(users_count):
     cursor.executemany(insert_query, data_tuples)
 
     connection.commit()
-    cursor.close()
-    connection.close()
+
+    print(f"metrics generated successfully, sample: {data[0]}")
 
 
 def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username= "amustee22@gmail.com", password= "mjtogcqrrttddusp"):
@@ -115,7 +115,7 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
         - Total Steps: {round(metrics['total_steps_count'])}, {round(metrics['total_steps_count_percent_change'])}% change from yesterday
         - Total Calories Burned: {round(metrics['total_calories_burned'])}, {round(metrics['total_calories_burned_percent_change'])}% change from yesterday
         - Average Body Temperature: {round(metrics['avg_body_temperature'])}\u00B0C, {round(metrics['avg_body_temperature_percent_change'])}% change from yesterday
-        - Average Stress Level: {round(metrics['avg_stress_level'])}, {round(metrics['avg_stress_level_change'])} from yesterday
+        - Average Stress Level: {round(metrics['avg_stress_level'])}, {metrics['avg_stress_level_change']} from yesterday
         - Activity Level: {metrics['avg_activity_level']}, {metrics['avg_activity_level_change']} from yesterday
 
         Best regards,
@@ -141,17 +141,23 @@ def read_health_metrics_task():
 
     reports = {}
     try:
-        cursor.callproc('agg_metrics')
+        cursor.execute("USE health_metrics_4")
+        cursor.execute("UPDATE health_metrics_4.users SET email = 'amustee22@gmail.com' WHERE user_id = 1")
+        cursor.callproc('health_metrics_4.agg_metrics')
 
-        for result in cursor.stored_results():
-            rows = result.fetchall()
-            for row in rows:
-                reports[row['email']] = row
+        print("aggregated metrics: \n")
+        if cursor.stored_results():
+            for result in cursor.stored_results():
+                rows = result.fetchall()
+                for row in rows:
+                    reports[row['email']] = row
+                print(rows)
+        else: print("stored result empty")
 
     except Exception as e:
         print(f"read_health_metrics_task error: {e}")
     finally:
-        print(reports)
+        print("reports", reports)
         cursor.close()
         connection.close()
 
