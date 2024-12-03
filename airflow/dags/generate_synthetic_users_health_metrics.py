@@ -117,7 +117,7 @@ with DAG(
     import_db = MySqlOperator(
         task_id= "import_db",
         mysql_conn_id='mysql_u_admin',
-        sql='/workspaces/weatherman_workflow/airflow/dags/health_metrics_3.sql',    
+        sql='health_metrics_3.sql',    
     )
 
 
