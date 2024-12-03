@@ -29,24 +29,27 @@ default_args = {
 # )
 
 # cursor = connection.cursor(dictionary=True)
-connection, cursor = None
+users_count = 5
 
-def mysql_login(user= "admin", password= 1234):
+def mysql_login(user= "admin", password= "1234"):
     try:
-        global connection, cursor
         connection = mysql.connector.connect(
         user= user,
         password= password
         )
 
-        cursor = connection.cursor(dictionary= True)
+        print(f"mysql_login: {connection.is_connected()}")
+        return connection
+
     except Exception as e:
-        print(f"mysql.connect failed: {e}")
+        print(f"mysql.connect failed: {e}")        
 
 
-def generate_users(users_count):
+def generate_users():
 
-    global connection, cursor
+    global users_count
+    connection = mysql_login()
+    cursor = connection.cursor(dictionary=True)
 
     users = [
         {
@@ -58,6 +61,9 @@ def generate_users(users_count):
         }
         for i in range(users_count)
     ]
+
+    print(f"# of users: {len(users)}")
+    
     insert_query="""
     INSERT INTO health_metrics_4.users(first_name, last_name, age, gender, email) VALUES(%s, %s, %s, %s, %s)
     """
@@ -70,16 +76,24 @@ def generate_users(users_count):
         user['email']
     ) for user in users]
 
-    cursor.executemany(insert_query, users_tuples)
+    try:
+        cursor.executemany(insert_query, users_tuples)
+        connection.commit()
+        print(f"users generated successfully, sample: {users[0]}")
 
-    connection.commit()
+    except Exception as e:
+        print(f"generate_users failed: {e}")
 
-    print(f"users generated successfully, sample: {users[0]}")
+    finally:
+        cursor.close()
+        connection.close()
 
 
-def generate_metrics(users_count):
+def generate_metrics():
 
-    global connection, cursor
+    global users_count
+    connection = mysql_login()
+    cursor = connection.cursor(dictionary=True)
 
     data = [
         {
@@ -112,12 +126,17 @@ def generate_metrics(users_count):
                 record['stress_level'], 
                 record['body_temperature'], 
                 record['activity_level']) for record in data]
+    try:
+        cursor.executemany(insert_query, data_tuples)
+        connection.commit()
+        print(f"metrics generated successfully, sample: {data[0]}")
 
-    cursor.executemany(insert_query, data_tuples)
+    except Exception as e:
+        print(f"generate_metrics failed: {e}")
 
-    connection.commit()
-
-    print(f"metrics generated successfully, sample: {data[0]}")
+    finally:
+        cursor.close()
+        connection.close()
 
 
 def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username= "amustee22@gmail.com", password= "mjtogcqrrttddusp"):
@@ -158,8 +177,9 @@ def read_health_metrics_task():
 
     reports = {}
     try:
-        global connection
-        global cursor
+        connection = mysql_login()
+        cursor = connection.cursor(dictionary=True)
+
         cursor.execute("USE health_metrics_4")
         cursor.execute("UPDATE health_metrics_4.users SET email = 'amustee22@gmail.com' WHERE user_id = 1")
         cursor.callproc('health_metrics_4.agg_metrics')
@@ -189,7 +209,7 @@ def read_health_metrics_task():
 
 
 with DAG(
-    dag_id= "complete_project",
+    dag_id= "complete_project_2",
     start_date = datetime(2024, 12, 2),
     schedule_interval='@daily',
     default_args= default_args,
@@ -215,14 +235,12 @@ with DAG(
 
     generate_users_task = PythonOperator(
         task_id= "generate_users",
-        python_callable= generate_users,
-        op_kwargs= {"users_count": 5}
+        python_callable= generate_users
     )
 
     generate_metrics_taks = PythonOperator(
         task_id = "generate_metrics",
-        python_callable= generate_metrics,
-        op_kwargs= {"users_count": 5}
+        python_callable= generate_metrics
     )
 
     send_emails = PythonOperator(
@@ -231,7 +249,7 @@ with DAG(
     )
 
 
-    start_mysql >> import_db >> [generate_users_task, generate_metrics_taks] >> send_emails
+    start_mysql >> mysql_login_task >> import_db >> [generate_users_task, generate_metrics_taks] >> send_emails
 
 
 
