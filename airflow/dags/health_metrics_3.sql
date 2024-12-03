@@ -44,7 +44,7 @@ BEGIN
                 ELSE 'high'
             END AS avg_activity_level
         FROM health_metrics_4.metrics
-        WHERE DATEDIFF(NOW(), date_time) <= 2
+        WHERE DATEDIFF(NOW(), date_time) BETWEEN 1 AND 2
         GROUP BY user_id, DATE(date_time)
     ), metrics_day_on_day AS (
         SELECT 
