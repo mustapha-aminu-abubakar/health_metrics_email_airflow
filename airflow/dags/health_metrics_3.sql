@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS health_metrics_4 DEFAULT CHARSET = 'utf8mb4';
-USE health_metrics_4;
+CREATE DATABASE IF NOT EXISTS health_metrics DEFAULT CHARSET = 'utf8mb4';
+USE health_metrics;
 
 CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,7 +43,7 @@ BEGIN
                 WHEN AVG(activity_level) < 0.8 THEN 'moderate'
                 ELSE 'high'
             END AS avg_activity_level
-        FROM health_metrics_4.metrics
+        FROM health_metrics.metrics
         WHERE DATEDIFF(CURDATE() - INTERVAL 1 DAY, DATE(date_time)) <= 1 
         GROUP BY user_id, DATE(date_time)
     ), metrics_day_on_day AS (
@@ -86,9 +86,9 @@ BEGIN
                 WHEN avg_activity_level = 'moderate' AND avg_activity_level_prev != 'low' THEN 'increased'
             END AS avg_activity_level_change
         FROM metrics_day_on_day
-        WHERE `date` = (SELECT MAX(DATE(date_time)) FROM health_metrics_4.metrics)
+        WHERE `date` = (SELECT MAX(DATE(date_time)) FROM health_metrics.metrics)
     )
-    SELECT * FROM metrics_latest LEFT JOIN health_metrics_4.users ON metrics_latest.user_id = users.user_id;
+    SELECT * FROM metrics_latest LEFT JOIN health_metrics.users ON metrics_latest.user_id = users.user_id;
 END 
 
 

@@ -16,19 +16,7 @@ default_args = {
     "retry_delay": timedelta(minutes=1)
 }
 
-# mysql_cred = {
-#     "username": "admin",
-#     "port": 3306,
-#     "host": "localhost",
-#     "password": "1234",  
-# }
 
-# connection = mysql.connector.connect(
-#       user= mysql_cred['username'],
-#       password= mysql_cred['password'],
-# )
-
-# cursor = connection.cursor(dictionary=True)
 users_count = 5
 
 def mysql_login(user= "admin", password= "1234"):
@@ -37,12 +25,13 @@ def mysql_login(user= "admin", password= "1234"):
         user= user,
         password= password
         )
-
-        print(f"mysql_login: {connection.is_connected()}")
         return connection
 
     except Exception as e:
-        print(f"mysql.connect failed: {e}")        
+        print(f"mysql.connect failed: {e}")       
+
+    finally:
+        print(f"mysql_login: {connection.is_connected()}")
 
 
 def generate_users():
@@ -59,13 +48,13 @@ def generate_users():
             "gender": fake.random.choice(['male', 'female', 'others']),
             "email": fake.email()
         }
-        for i in range(users_count)
+        for _ in range(users_count)
     ]
 
-    print(f"# of users: {len(users)}")
+    print(f"# of users generated: {len(users)}")
     
     insert_query="""
-    INSERT INTO health_metrics_4.users(first_name, last_name, age, gender, email) VALUES(%s, %s, %s, %s, %s)
+    INSERT INTO health_metrics.users(first_name, last_name, age, gender, email) VALUES(%s, %s, %s, %s, %s)
     """
 
     users_tuples=[(
@@ -79,7 +68,7 @@ def generate_users():
     try:
         cursor.executemany(insert_query, users_tuples)
         connection.commit()
-        print(f"users generated successfully, sample: {users[0]}")
+        print(f"users inserted successfully, sample: {users[0]}")
 
     except Exception as e:
         print(f"generate_users failed: {e}")
@@ -112,7 +101,7 @@ def generate_metrics():
     ]
 
     insert_query = """
-        INSERT INTO health_metrics_4.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO health_metrics.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """            
 
     data_tuples = [(
@@ -126,10 +115,13 @@ def generate_metrics():
                 record['stress_level'], 
                 record['body_temperature'], 
                 record['activity_level']) for record in data]
+
+    print(f"{len(data_tuples)} rows generated")
+    
     try:
         cursor.executemany(insert_query, data_tuples)
         connection.commit()
-        print(f"metrics generated successfully, sample: {data[0]}")
+        print(f"metrics inserted successfully, sample: {data[0]}")
 
     except Exception as e:
         print(f"generate_metrics failed: {e}")
@@ -156,7 +148,7 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
 
         Best regards,
         Abubakar Mustapha Aminu
-        """.ljust()
+        """
 
         # Create and send the email
         msg = MIMEText(body)
@@ -165,12 +157,14 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
         msg['To'] = to_email
 
         with smtplib.SMTP(server, port) as server:
-            print(f"sending email to {to_email}")
-            server.starttls()
-            server.login(username, password)
-            response = server.send_message(msg)
-
-            print(f"email successfully sent to {to_email}") if not response else print(f"email to {to_email} failed")
+            try:
+                print(f"sending email to {to_email}")
+                server.starttls()
+                server.login(username, password)
+                response = server.send_message(msg)
+                print(f"email successfully sent to {to_email}") if not response else print(f"email to {to_email} failed")
+            except Exception as e:
+                print(f"email to {to_email} failed: {e}")
 
 
 def read_health_metrics_task():
@@ -180,9 +174,9 @@ def read_health_metrics_task():
         connection = mysql_login()
         cursor = connection.cursor(dictionary=True)
 
-        cursor.execute("USE health_metrics_4")
-        cursor.execute("UPDATE health_metrics_4.users SET email = 'amustee22@gmail.com' WHERE user_id = 1")
-        cursor.callproc('health_metrics_4.agg_metrics')
+        cursor.execute("USE health_metrics")
+        cursor.execute("UPDATE health_metrics.users SET email = 'amustee22@gmail.com' WHERE user_id = 1")
+        cursor.callproc('health_metrics.agg_metrics')
 
         print("aggregated metrics: \n")
         if cursor.stored_results():
@@ -221,10 +215,6 @@ with DAG(
         bash_command= "sudo service mysql start"
     )
 
-    mysql_login_task = PythonOperator(
-        task_id= "mysql_login",
-        python_callable= mysql_login
-    )
 
     import_db = MySqlOperator(
         task_id= "import_db",
@@ -249,7 +239,7 @@ with DAG(
     )
 
 
-    start_mysql >> mysql_login_task >> import_db >> [generate_users_task, generate_metrics_taks] >> send_emails
+    start_mysql >> import_db >> [generate_users_task, generate_metrics_taks] >> send_emails
 
 
 
