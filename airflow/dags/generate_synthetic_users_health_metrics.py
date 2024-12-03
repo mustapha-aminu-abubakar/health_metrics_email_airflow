@@ -2,6 +2,7 @@ from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
+from airflow.providers.mysql.operators.mysql import MySqlOperator
 from faker import Faker
 import mysql.connector
 
@@ -105,17 +106,20 @@ with DAG(
     dag_id= "generate_synthetic_users_health_metrics",
     start_date = datetime(2024, 12, 2),
     schedule_interval='@daily',
-    default_args= default_args
+    default_args= default_args,
+    catchup= False
 ) as dag:
-    start_mysql = BashOperator(
-        task_id= "start_mysql",
-        bash_command= "sudo service mysql start"
+    # start_mysql = BashOperator(
+    #     task_id= "start_mysql",
+    #     bash_command= "sudo service mysql start"
+    # )
+
+    import_db = MySqlOperator(
+        task_id= "import_db",
+        mysql_conn_id='mysql_u_admin',
+        sql='/workspaces/weatherman_workflow/airflow/dags/health_metrics_3.sql',    
     )
 
-    import_db = BashOperator(
-        task_id= "import_db",
-        bash_command= f"mysql -u {mysql_cred['username']} -p {mysql_cred['password']} < /workspaces/weatherman_workflow/health_metrics_3.sql"
-    )
 
     generate_users_task = PythonOperator(
         task_id= "generate_users",
@@ -129,7 +133,7 @@ with DAG(
         op_kwargs= {"users_count": 5}
     )
 
-    start_mysql >> import_db >> [generate_users_task, generate_metrics_taks]
+    import_db >> [generate_users_task, generate_metrics_taks]
 
 
 
