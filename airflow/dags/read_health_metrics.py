@@ -35,13 +35,13 @@ def read_health_metrics():
         Hello {metrics['first_name']},
 
         Here are your aggregated health metrics for the day:
-        - Average Heart Rate: {metrics['avg_heart_rate']}, {metrics['avg_heart_rate_percent_change']} change from yesterday
-        - Average Blood Oxygen: {metrics['avg_blood_oxygen']}, {metrics['avg_blood_oxygen_percent_change']} change from yesterday
-        - Total Steps Count: {metrics['total_steps_count']}, {metrics['total_steps_count_percent_change']} change from yesterday
-        - Total Calories Burned: {metrics['total_calories_burned']}, {metrics['total_calories_burned_percent_change']} change from yesterday
-        - Average Stress Level: {metrics['avg_stress_level']}, {metrics['avg_stress_level_percent_change']} change from yesterday
-        - Average Body Temperature: {metrics['avg_body_temperature']}, {metrics['avg_body_temperature_percent_change']} change from yesterday
-        - Activity Level: {metrics['avg_activity_level']}, {metrics['avg_blood_oxygen_percent_change']} compared to yesterday
+        - Average Heart Rate: {round(metrics['avg_heart_rate'])} bpm, {round(metrics['avg_heart_rate_percent_change'])}% change from yesterday
+        - Average Blood Oxygen: {round(metrics['avg_blood_oxygen'])}%, {round(metrics['avg_blood_oxygen_percent_change'])}% change from yesterday
+        - Total Steps: {round(metrics['total_steps_count'])}, {round(metrics['total_steps_count_percent_change'])}% change from yesterday
+        - Total Calories Burned: {round(metrics['total_calories_burned'])}, {round(metrics['total_calories_burned_percent_change'])}% change from yesterday
+        - Average Body Temperature: {round(metrics['avg_body_temperature'])}C, {round(metrics['avg_body_temperature_percent_change'])}% change from yesterday
+        - Average Stress Level: {round(metrics['avg_stress_level'])}, {round(metrics['avg_stress_level_change'])} from yesterday
+        - Activity Level: {round(metrics['avg_activity_level'])}, {round(metrics['avg_activity_level_change'])} from yesterday
 
         Best regards,
         Abubakar Mustapha Aminu

@@ -71,10 +71,14 @@ BEGIN
             (total_steps_count - total_steps_count_prev) / total_steps_count_prev * 100 AS total_steps_count_percent_change,
             total_calories_burned,
             (total_calories_burned - total_calories_burned_prev) / total_calories_burned_prev * 100 AS total_calories_burned_percent_change,
-            avg_stress_level,
-            (avg_stress_level - avg_stress_level_prev) / avg_stress_level_prev * 100 AS avg_stress_level_percent_change,
             avg_body_temperature,
             (avg_body_temperature - avg_body_temperature_prev) / avg_body_temperature_prev * 100 AS avg_body_temperature_percent_change,
+            avg_stress_level,
+            CASE 
+                WHEN avg_stress_level > avg_activity_level_prev THEN  'increased'
+                WHEN avg_stress_level < avg_activity_level_prev THEN  'decreased'
+                ELSE  'no change'
+            END as avg_stress_level_change,
             avg_activity_level,
             CASE 
                 WHEN avg_activity_level = avg_activity_level_prev THEN 'no change'

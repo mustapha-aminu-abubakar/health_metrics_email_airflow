@@ -10,7 +10,7 @@ fake = Faker()
 
 default_args = {
     "retries": 1,
-    "retry_delay": timedelta(minutes=5)
+    "retry_delay": timedelta(minutes=1)
 }
 
 
@@ -29,9 +29,8 @@ connection = mysql.connector.connect(
 cursor = connection.cursor()
 
 
-def generate_users(ti, users_count):
+def generate_users(users_count):
 
-    ti.xcom_push(key="users_count", value=users_count)    
     users = [
         {
             "first_name": fake.first_name(),
@@ -61,10 +60,7 @@ def generate_users(ti, users_count):
     connection.close()
 
 
-def generate_metrics(ti):
-
-    users_count = ti.xcom_pull(task_ids= "generate_users", key="users_count")
-    print("users_count in generate_metrics", users_count)
+def generate_metrics(users_count):
 
     data = [
         {
@@ -118,7 +114,7 @@ with DAG(
 
     import_db = BashOperator(
         task_id= "import_db",
-        bash_command= f"sudo mysql < /workspaces/weatherman_workflow/health_metrics_3.sql"
+        bash_command= f"mysql -u {mysql_cred['username']} -p {mysql_cred['password']} < /workspaces/weatherman_workflow/health_metrics_3.sql"
     )
 
     generate_users_task = PythonOperator(
@@ -129,7 +125,8 @@ with DAG(
 
     generate_metrics_taks = PythonOperator(
         task_id = "generate_metrics",
-        python_callable= generate_metrics
+        python_callable= generate_metrics,
+        op_kwargs= {"users_count": 5}
     )
 
     start_mysql >> import_db >> [generate_users_task, generate_metrics_taks]
