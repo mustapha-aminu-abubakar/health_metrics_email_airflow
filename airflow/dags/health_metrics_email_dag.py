@@ -17,8 +17,8 @@ default_args = {
     "retry_delay": timedelta(minutes=1)
 }
 
-sample_name = input("Please enter your name: \n")
-sample_email = input("Please enter your email address: \n")
+sample_name = "Musty"
+sample_email = "amustee22@gmail.com"
 
 
 users_count = 5
@@ -154,10 +154,10 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
         # Abubakar Mustapha Aminu
         # """
         
-        body_html = f"""
+        body = f"""
             <!DOCTYPE html>
             <body>
-            <h3> Hello {metrics['last_name']}, here is a summary of your daily health metrics for {metrics['date']} </h3>
+            <h3> Hello {metrics['first_name']}, here is a summary of your daily health metrics for {metrics['date']} </h3>
                 <table>
                     <thead>
                         <tr>
@@ -199,6 +199,9 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                         </tr>
                     </tbody>
                 </table>
+                <style>
+                    
+                </style>
             </body>
             </html>
         """
@@ -207,7 +210,8 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
         msg['From'] = username
         msg['To'] = to_email
         
-        msg.attach(MIMEText(body_html, "html"))
+        body_html = MIMEText(body, "html")
+        msg.attach(body_html)
 
 
         with smtplib.SMTP(server, port) as server:
@@ -215,8 +219,8 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                 print(f"sending email to {to_email}")
                 server.starttls()
                 server.login(username, password)
-                response = server.send_message(username, to_email, msg.as_string())
-                print(f"email successfully sent to {to_email}") if not response else print(f"email to {to_email} failed")
+                server.send_message(msg)
+                print(f"email successfully sent to {to_email}") 
             except Exception as e:
                 print(f"email to {to_email} failed: {e}")
 
@@ -230,7 +234,7 @@ def agg_metrics_and_send_mail():
         cursor = connection.cursor(dictionary=True)
 
         cursor.execute("USE health_metrics")
-        cursor.execute(f"UPDATE health_metrics.users SET email = {sample_email}, first_name ={sample_name.split()[0]}  WHERE user_id = 1")
+        cursor.execute(f"UPDATE health_metrics.users SET email = '{sample_email}', first_name ='{sample_name.split()[0]}'  WHERE user_id = 1")
         cursor.callproc('health_metrics.agg_metrics')
 
         print("aggregated metrics: \n")
