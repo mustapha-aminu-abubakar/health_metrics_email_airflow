@@ -143,9 +143,6 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                         box-sizing: border-box
                     }}
                     
-                    .header{{
-                        font-size: 1.2em
-                    }}
 
                     body{{
                         max-width: 400px
@@ -170,18 +167,18 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                 </style>
             </head>
             <body>
-            <p class="header"> Hello <b>{metrics['first_name']}</b>, here is a summary of your daily health metrics for <b>{metrics['date']}</b> </p>
+            <p> Hello <b>{metrics['first_name']}</b>, here is a summary of your daily health metrics for <b>{metrics['date']}</b> </p>
                 <table>
                     <colgroup>
-                    <col style="width: 40%">
+                    <col style="width: 50%">
                     <col style="width: 30%">
-                    <col style="width: 30%">
+                    <col style="width: 20%">
                     </colgroup>
                     <thead>
                         <tr>
                             <th> Metric </th>
                             <th> Value  </th>
-                            <th> Change (%) </th>
+                            <th> Change <small>*</small></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -210,7 +207,8 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                     </tbody>
                 </table>
                 <p>Best regards, Mustapha Aminu</p>
-                
+                <br>
+                <p><small>Change compared to the previous day</small></p>
             </body>
             </html>
         """

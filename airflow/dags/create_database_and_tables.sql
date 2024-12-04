@@ -68,6 +68,3 @@ BEGIN
     SELECT * FROM metrics_latest LEFT JOIN health_metrics.users ON metrics_latest.user_id = users.user_id;
 END 
 
-
-INSERT into health_metrics.metrics(date_time, heart_rate, blood_oxygen, steps_count, calories_burned, body_temperature) VALUES ()
-
