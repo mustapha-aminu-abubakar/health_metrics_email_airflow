@@ -49,6 +49,7 @@ BEGIN
     ), metrics_day_on_day AS (
         SELECT 
             *,
+            LEAD(`date`) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS date_prev,
             LEAD(avg_heart_rate) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS avg_heart_rate_prev,
             LEAD(avg_blood_oxygen) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS avg_blood_oxygen_prev,
             LEAD(total_steps_count) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS total_steps_count_prev,

@@ -6,6 +6,7 @@ from airflow.providers.mysql.operators.mysql import MySqlOperator
 from faker import Faker
 import mysql.connector
 import smtplib
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 
@@ -15,6 +16,9 @@ default_args = {
     "retries": 1,
     "retry_delay": timedelta(minutes=1)
 }
+
+sample_name = input("Please enter your name: \n")
+sample_email = input("Please enter your email address: \n")
 
 
 users_count = 5
@@ -134,48 +138,99 @@ def generate_metrics():
 def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username= "amustee22@gmail.com", password= "mjtogcqrrttddusp"):
         
         subject = "Your Daily Health Metrics"
-        body = f"""
-        Hello {metrics['first_name']},
+        # body = f"""
+        # Hello {metrics['first_name']},
 
-        Here are your aggregated health metrics for the day:
-        - Average Heart Rate: {round(metrics['avg_heart_rate'])} bpm, {round(metrics['avg_heart_rate_percent_change'])}% change from yesterday
-        - Average Blood Oxygen: {round(metrics['avg_blood_oxygen'])}%, {round(metrics['avg_blood_oxygen_percent_change'])}% change from yesterday
-        - Total Steps: {round(metrics['total_steps_count'])}, {round(metrics['total_steps_count_percent_change'])}% change from yesterday
-        - Total Calories Burned: {round(metrics['total_calories_burned'])}, {round(metrics['total_calories_burned_percent_change'])}% change from yesterday
-        - Average Body Temperature: {round(metrics['avg_body_temperature'])}\u00B0C, {round(metrics['avg_body_temperature_percent_change'])}% change from yesterday
-        - Average Stress Level: {round(metrics['avg_stress_level'])}, {metrics['avg_stress_level_change']} from yesterday
-        - Activity Level: {metrics['avg_activity_level']}, {metrics['avg_activity_level_change']} from yesterday
+        # Here are your aggregated health metrics for the day:
+        # - Average Heart Rate: {round(metrics['avg_heart_rate'])} bpm, {round(metrics['avg_heart_rate_percent_change'])}% change from yesterday
+        # - Average Blood Oxygen: {round(metrics['avg_blood_oxygen'])}%, {round(metrics['avg_blood_oxygen_percent_change'])}% change from yesterday
+        # - Total Steps: {round(metrics['total_steps_count'])}, {round(metrics['total_steps_count_percent_change'])}% change from yesterday
+        # - Total Calories Burned: {round(metrics['total_calories_burned'])}, {round(metrics['total_calories_burned_percent_change'])}% change from yesterday
+        # - Average Body Temperature: {round(metrics['avg_body_temperature'])}\u00B0C, {round(metrics['avg_body_temperature_percent_change'])}% change from yesterday
+        # - Average Stress Level: {round(metrics['avg_stress_level'])}, {metrics['avg_stress_level_change']} from yesterday
+        # - Activity Level: {metrics['avg_activity_level']}, {metrics['avg_activity_level_change']} from yesterday
 
-        Best regards,
-        Abubakar Mustapha Aminu
+        # Best regards,
+        # Abubakar Mustapha Aminu
+        # """
+        
+        body_html = f"""
+            <!DOCTYPE html>
+            <body>
+            <h3> Hello {metrics['last_name']}, here is a summary of your daily health metrics for {metrics['date']} </h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <td> Metric </td>
+                            <td> Value {metrics['date']} </td>
+                            <td> day-on-day change </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td> Heart rate </td>
+                            <td> {metrics['avg_heart_rate']} bpm </td>
+                            <td> {metrics['avg_heart_rate_percent_change']} </td>
+                        </tr>
+                        <tr>
+                            <td> Blood oxygen </td>
+                            <td> {metrics['avg_blood_oxygen']}% </td>
+                            <td> {metrics['avg_blood_oxygen_percent_change']}% </td>
+                        </tr><tr>
+                            <td> Steps walked </td>
+                            <td> {metrics['total_steps_count']} </td>
+                            <td> {metrics['total_steps_count_percent_change']}% </td>
+                        </tr><tr>
+                            <td> Calories burned </td>
+                            <td> {metrics['total_calories_burned']} </td>
+                            <td> {metrics['total_calories_burned_percent_change']}% </td>
+                        </tr><tr>
+                            <td> Body temperature </td>
+                            <td> {metrics['avg_body_temperature']}\u00B0C </td>
+                            <td> {metrics['avg_body_temperature_percent_change']}% </td>
+                        </tr><tr>
+                            <td> Stress level </td>
+                            <td> {metrics['avg_stress_level']} </td>
+                            <td> {metrics['avg_stress_level_change']} </td>
+                        </tr><tr>
+                            <td> Activity level </td>
+                            <td> {metrics['avg_activity_level']} </td>
+                            <td> {metrics['avg_activity_level_change']} </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </body>
+            </html>
         """
-
-        # Create and send the email
-        msg = MIMEText(body)
+        msg = MIMEMultipart("alternative")
         msg['Subject'] = subject
         msg['From'] = username
         msg['To'] = to_email
+        
+        msg.attach(MIMEText(body_html, "html"))
+
 
         with smtplib.SMTP(server, port) as server:
             try:
                 print(f"sending email to {to_email}")
                 server.starttls()
                 server.login(username, password)
-                response = server.send_message(msg)
+                response = server.send_message(username, to_email, msg.as_string())
                 print(f"email successfully sent to {to_email}") if not response else print(f"email to {to_email} failed")
             except Exception as e:
                 print(f"email to {to_email} failed: {e}")
 
 
-def read_health_metrics_task():
-
+def agg_metrics_and_send_mail():
+    
+    global sample_name, sample_email
     reports = {}
     try:
         connection = mysql_login()
         cursor = connection.cursor(dictionary=True)
 
         cursor.execute("USE health_metrics")
-        cursor.execute("UPDATE health_metrics.users SET email = 'amustee22@gmail.com' WHERE user_id = 1")
+        cursor.execute(f"UPDATE health_metrics.users SET email = {sample_email}, first_name ={sample_name.split()[0]}  WHERE user_id = 1")
         cursor.callproc('health_metrics.agg_metrics')
 
         print("aggregated metrics: \n")
@@ -188,7 +243,7 @@ def read_health_metrics_task():
         else: print("stored result empty")
 
     except Exception as e:
-        print(f"read_health_metrics_task error: {e}")
+        print(f"agg_metrics_and_send_mail error: {e}")
     finally:
         print("reports", reports)
         cursor.close()
@@ -217,9 +272,9 @@ with DAG(
 
 
     import_db = MySqlOperator(
-        task_id= "import_db",
+        task_id= "create_database_and_tables",
         mysql_conn_id='mysql_u_admin',
-        sql='health_metrics_3.sql',    
+        sql='create_database_and_tables.sql',    
     )
 
 
@@ -235,7 +290,7 @@ with DAG(
 
     send_emails = PythonOperator(
         task_id = "send_emails",
-        python_callable = read_health_metrics_task
+        python_callable = agg_metrics_and_send_mail
     )
 
 
