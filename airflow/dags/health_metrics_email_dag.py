@@ -157,12 +157,10 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                         font-weight: bold;
                         padding: 20px auto;
                         text-align: center;
-                        font-size: 1.2em
                     }}
 
                     td {{
-                        padding: 20px auto !important;
-                        font-size: 1.2em;
+                        padding: 20px 10px;
                     }}
 
                    
