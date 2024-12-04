@@ -15,12 +15,10 @@ CREATE TABLE IF NOT EXISTS metrics (
     date_time DATETIME NOT NULL,
     heart_rate INT,
     blood_oxygen FLOAT(7,2),
+    blood_pressure FLOAT(7,2),
     steps_count INT,
     calories_burned FLOAT(7,2),
-    sleep_duration FLOAT(7,2),
-    stress_level INT,
     body_temperature FLOAT(7,2),
-    activity_level FLOAT(7,2)
 );
 
 
@@ -36,13 +34,7 @@ BEGIN
             AVG(blood_oxygen) AS avg_blood_oxygen,
             SUM(steps_count) AS total_steps_count,
             SUM(calories_burned) AS total_calories_burned,
-            AVG(stress_level) AS avg_stress_level,
-            AVG(body_temperature) AS avg_body_temperature,
-            CASE 
-                WHEN AVG(activity_level) < 0.5 THEN 'low'
-                WHEN AVG(activity_level) < 0.8 THEN 'moderate'
-                ELSE 'high'
-            END AS avg_activity_level
+            AVG(body_temperature) AS avg_body_temperature
         FROM health_metrics.metrics
         WHERE DATEDIFF(CURDATE() - INTERVAL 1 DAY, DATE(date_time)) <= 1 
         GROUP BY user_id, DATE(date_time)
@@ -54,9 +46,7 @@ BEGIN
             LEAD(avg_blood_oxygen) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS avg_blood_oxygen_prev,
             LEAD(total_steps_count) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS total_steps_count_prev,
             LEAD(total_calories_burned) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS total_calories_burned_prev,
-            LEAD(avg_stress_level) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS avg_stress_level_prev,
             LEAD(avg_body_temperature) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS avg_body_temperature_prev,
-            LEAD(avg_activity_level) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS avg_activity_level_prev
         FROM metrics_by_user_daily
     ), metrics_latest AS (
         SELECT 
@@ -72,20 +62,6 @@ BEGIN
             (total_calories_burned - total_calories_burned_prev) / total_calories_burned_prev * 100 AS total_calories_burned_percent_change,
             avg_body_temperature,
             (avg_body_temperature - avg_body_temperature_prev) / avg_body_temperature_prev * 100 AS avg_body_temperature_percent_change,
-            avg_stress_level,
-            CASE 
-                WHEN avg_stress_level > avg_activity_level_prev THEN  'increased'
-                WHEN avg_stress_level < avg_activity_level_prev THEN  'decreased'
-                ELSE  'no change'
-            END as avg_stress_level_change,
-            avg_activity_level,
-            CASE 
-                WHEN avg_activity_level = avg_activity_level_prev THEN 'no change'
-                WHEN avg_activity_level = 'high' AND avg_activity_level_prev != 'high' THEN 'increased'
-                WHEN avg_activity_level = 'low' AND avg_activity_level_prev != 'low' THEN 'decreased'
-                WHEN avg_activity_level = 'moderate' AND avg_activity_level_prev = 'high' THEN 'decreased'
-                WHEN avg_activity_level = 'moderate' AND avg_activity_level_prev != 'low' THEN 'increased'
-            END AS avg_activity_level_change
         FROM metrics_day_on_day
         WHERE `date` = (SELECT MAX(DATE(date_time)) FROM health_metrics.metrics)
     )

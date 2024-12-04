@@ -96,16 +96,13 @@ def generate_metrics():
             "blood_oxygen": round(fake.random.uniform(95, 100), 1),  # percentage
             "steps_count": fake.random.randint(0, 20000),  # steps
             "calories_burned": round(fake.random.uniform(100, 1000), 2),  # kcal
-            "sleep_duration": round(fake.random.uniform(4, 10), 2),  # hours
-            "stress_level": fake.random.randint(1, 10),  # scale of 1 to 10
             "body_temperature": round(fake.random.uniform(36.0, 37.5), 1),  # Celsius
-            "activity_level": fake.random.choice([0, 0.5, 1])
         }
         for _ in range(users_count * 2000)
     ]
 
     insert_query = """
-        INSERT INTO health_metrics.metrics VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO health_metrics.metrics VALUES (%s, %s, %s, %s, %s, %s, %s)
     """            
 
     data_tuples = [(
@@ -115,10 +112,7 @@ def generate_metrics():
                 record['blood_oxygen'], 
                 record['steps_count'], 
                 record['calories_burned'], 
-                record['sleep_duration'], 
-                record['stress_level'], 
-                record['body_temperature'], 
-                record['activity_level']) for record in data]
+                record['body_temperature']) for record in data]
 
     print(f"{len(data_tuples)} rows generated")
     
@@ -138,21 +132,6 @@ def generate_metrics():
 def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username= "amustee22@gmail.com", password= "mjtogcqrrttddusp"):
         
         subject = "Your Daily Health Metrics"
-        # body = f"""
-        # Hello {metrics['first_name']},
-
-        # Here are your aggregated health metrics for the day:
-        # - Average Heart Rate: {round(metrics['avg_heart_rate'])} bpm, {round(metrics['avg_heart_rate_percent_change'])}% change from yesterday
-        # - Average Blood Oxygen: {round(metrics['avg_blood_oxygen'])}%, {round(metrics['avg_blood_oxygen_percent_change'])}% change from yesterday
-        # - Total Steps: {round(metrics['total_steps_count'])}, {round(metrics['total_steps_count_percent_change'])}% change from yesterday
-        # - Total Calories Burned: {round(metrics['total_calories_burned'])}, {round(metrics['total_calories_burned_percent_change'])}% change from yesterday
-        # - Average Body Temperature: {round(metrics['avg_body_temperature'])}\u00B0C, {round(metrics['avg_body_temperature_percent_change'])}% change from yesterday
-        # - Average Stress Level: {round(metrics['avg_stress_level'])}, {metrics['avg_stress_level_change']} from yesterday
-        # - Activity Level: {metrics['avg_activity_level']}, {metrics['avg_activity_level_change']} from yesterday
-
-        # Best regards,
-        # Abubakar Mustapha Aminu
-        # """
         
         body = f"""
             <!DOCTYPE html>
@@ -162,6 +141,10 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
             <style>
                     *{{
                         box-sizing: border-box
+                    }}
+                    
+                    .header{{
+                        font-size: 1.2em
                     }}
 
                     table{{
@@ -186,50 +169,42 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                 </style>
             </head>
             <body>
-            <h3> Hello {metrics['first_name']}, here is a summary of your daily health metrics for {metrics['date']} </h3>
+            <p class="header"> Hello <b>{metrics['first_name']}</b>, here is a summary of your daily health metrics for <b>{metrics['date']}</b> </p>
                 <table>
                     <colgroup>
-                    <col style="width: 33.33%">
-                    <col style="width: 33.33%">
-                    <col style="width: 33.33%">
+                    <col style="width: 40%">
+                    <col style="width: 30%">
+                    <col style="width: 30%">
                     </colgroup>
                     <thead>
                         <tr>
                             <th> Metric </th>
                             <th> Value  </th>
-                            <th> day-on-day change </th>
+                            <th> Change (%) </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td> Heart rate </td>
-                            <td> {round(metrics['avg_heart_rate'])} bpm </td>
+                            <td> Heart rate (bpm) </td>
+                            <td> {round(metrics['avg_heart_rate'])} </td>
                             <td> {round(metrics['avg_heart_rate_percent_change'])}% </td>
                         </tr>
                         <tr>
-                            <td> Blood oxygen </td>
-                            <td> {round(metrics['avg_blood_oxygen'])}% </td>
+                            <td> Blood oxygen (%) </td>
+                            <td> {round(metrics['avg_blood_oxygen'])} </td>
                             <td> {round(metrics['avg_blood_oxygen_percent_change'])}% </td>
                         </tr><tr>
-                            <td> Steps walked </td>
-                            <td> {round(metrics['total_steps_count'] /1000, 1)} k </td>
+                            <td> Steps </td>
+                            <td> {metrics['total_steps_count']} </td>
                             <td> {round(metrics['total_steps_count_percent_change'])}% </td>
                         </tr><tr>
-                            <td> Calories burned </td>
-                            <td> {round(metrics['total_calories_burned'] / 1000, 1)} k </td>
+                            <td> Calories burned (kcal) </td>
+                            <td> {round(metrics['total_calories_burned'] / 1000)} </td>
                             <td> {round(metrics['total_calories_burned_percent_change'])}% </td>
                         </tr><tr>
                             <td> Body temperature </td>
                             <td> {round(metrics['avg_body_temperature'], 1)}\u00B0C </td>
                             <td> {round(metrics['avg_body_temperature_percent_change'])}% </td>
-                        </tr><tr>
-                            <td> Stress level </td>
-                            <td> {round(metrics['avg_stress_level'])} </td>
-                            <td> {metrics['avg_stress_level_change']} </td>
-                        </tr><tr>
-                            <td> Activity level </td>
-                            <td> {metrics['avg_activity_level']} </td>
-                            <td> {metrics['avg_activity_level_change']} </td>
                         </tr>
                     </tbody>
                 </table>
