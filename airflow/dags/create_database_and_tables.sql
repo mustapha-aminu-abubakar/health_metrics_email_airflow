@@ -15,10 +15,9 @@ CREATE TABLE IF NOT EXISTS metrics (
     date_time DATETIME NOT NULL,
     heart_rate INT,
     blood_oxygen FLOAT(7,2),
-    blood_pressure FLOAT(7,2),
     steps_count INT,
     calories_burned FLOAT(7,2),
-    body_temperature FLOAT(7,2),
+    body_temperature FLOAT(7,2)
 );
 
 
@@ -69,5 +68,5 @@ BEGIN
 END 
 
 
-
+INSERT into health_metrics.metrics(date_time, heart_rate, blood_oxygen, steps_count, calories_burned, body_temperature) VALUES ()
 
