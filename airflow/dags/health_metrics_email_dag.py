@@ -138,7 +138,7 @@ def generate_metrics():
 
     # formatting 'data' list of dicts to a list of tuples
     data_tuples = [(
-                record['user_id'], 
+                record['user_id'],
                 record['date_time'], 
                 record['heart_rate'], 
                 record['blood_oxygen'], 
@@ -264,7 +264,7 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
             <br>
             <p>Best regards, Mustapha Aminu</p>
             <br>
-            <p style="color: grey"><small>*<i>Change compared to the previous day</i></small></p>
+            <p style="color: grey"><small>*<i>Change compared to {(datetime(*map(int, metrics['date'].split('-'))) - timedelta(days=1)).strftime('%Y-%m-%d')}</i></small></p>
         </body>
         </html>
     """

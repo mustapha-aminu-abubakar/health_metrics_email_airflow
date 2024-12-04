@@ -36,7 +36,7 @@ BEGIN
             SUM(calories_burned) AS total_calories_burned,
             AVG(body_temperature) AS avg_body_temperature
         FROM health_metrics.metrics
-        WHERE DATEDIFF(CURDATE() - INTERVAL 1 DAY, DATE(date_time)) <= 1 
+        WHERE DATEDIFF(CURDATE(), DATE(date_time)) BETWEEN 1 AND 2
         GROUP BY user_id, DATE(date_time)
     ), metrics_day_on_day AS (
         SELECT 
@@ -63,7 +63,7 @@ BEGIN
             avg_body_temperature,
             (avg_body_temperature - avg_body_temperature_prev) / avg_body_temperature_prev * 100 AS avg_body_temperature_percent_change
         FROM metrics_day_on_day
-        WHERE `date` = (SELECT MAX(DATE(date_time)) FROM health_metrics.metrics)
+        WHERE `date` = CURDATE() - INTERVAL 1 DAY
     )
     SELECT * FROM metrics_latest LEFT JOIN health_metrics.users ON metrics_latest.user_id = users.user_id;
 END 
