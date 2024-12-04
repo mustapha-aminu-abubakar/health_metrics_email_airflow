@@ -156,41 +156,67 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
         
         body = f"""
             <!DOCTYPE html>
+            <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                    *{{
+                        box-sizing: border-box
+                    }}
+
+                    table{{
+                        margin: 10px auto;
+                        width: 100%;
+                        max-width: 400px
+                    }}
+
+                    th {{
+                        font-weight: bold;
+                        padding: 10px auto;
+                        text-align: center
+                    }}
+
+                    td {{
+                        padding: 10px auto;
+                        text-align: center
+                    }}
+                </style>
+            </head>
             <body>
             <h3> Hello {metrics['first_name']}, here is a summary of your daily health metrics for {metrics['date']} </h3>
                 <table>
                     <thead>
                         <tr>
-                            <td> Metric </td>
-                            <td> Value {metrics['date']} </td>
-                            <td> day-on-day change </td>
+                            <th> Metric </th>
+                            <th> Value  </th>
+                            <th> day-on-day change </th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
                             <td> Heart rate </td>
-                            <td> {metrics['avg_heart_rate']} bpm </td>
-                            <td> {metrics['avg_heart_rate_percent_change']} </td>
+                            <td> {round(metrics['avg_heart_rate'])} bpm </td>
+                            <td> {round(metrics['avg_heart_rate_percent_change'])}% </td>
                         </tr>
                         <tr>
                             <td> Blood oxygen </td>
-                            <td> {metrics['avg_blood_oxygen']}% </td>
-                            <td> {metrics['avg_blood_oxygen_percent_change']}% </td>
+                            <td> {round(metrics['avg_blood_oxygen'])}% </td>
+                            <td> {round(metrics['avg_blood_oxygen_percent_change'])}% </td>
                         </tr><tr>
                             <td> Steps walked </td>
-                            <td> {metrics['total_steps_count']} </td>
-                            <td> {metrics['total_steps_count_percent_change']}% </td>
+                            <td> {round(metrics['total_steps_count'] /1000, 1)} k </td>
+                            <td> {round(metrics['total_steps_count_percent_change'])}% </td>
                         </tr><tr>
                             <td> Calories burned </td>
-                            <td> {metrics['total_calories_burned']} </td>
-                            <td> {metrics['total_calories_burned_percent_change']}% </td>
+                            <td> {round(metrics['total_calories_burned'] / 1000, 1)} k </td>
+                            <td> {round(metrics['total_calories_burned_percent_change'])}% </td>
                         </tr><tr>
                             <td> Body temperature </td>
-                            <td> {metrics['avg_body_temperature']}\u00B0C </td>
-                            <td> {metrics['avg_body_temperature_percent_change']}% </td>
+                            <td> {round(metrics['avg_body_temperature'], 1)}\u00B0C </td>
+                            <td> {round(metrics['avg_body_temperature_percent_change'])}% </td>
                         </tr><tr>
                             <td> Stress level </td>
-                            <td> {metrics['avg_stress_level']} </td>
+                            <td> {round(metrics['avg_stress_level'])} </td>
                             <td> {metrics['avg_stress_level_change']} </td>
                         </tr><tr>
                             <td> Activity level </td>
@@ -199,9 +225,8 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                         </tr>
                     </tbody>
                 </table>
-                <style>
-                    
-                </style>
+                <p>Best regards, Mustapha Aminu</p>
+                
             </body>
             </html>
         """
