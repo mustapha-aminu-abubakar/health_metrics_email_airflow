@@ -21,9 +21,15 @@ default_args = {
 }
 
 
+
+###################################################
+###################################################
 # replace with a name and email of your choice
 sample_name = "Musty"
 sample_email = "amustee22@gmail.com" # a sample health metrics summary be sent to this address
+###################################################
+###################################################
+
 
 
 # specifying number of synthetic users to be generated in the database
