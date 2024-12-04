@@ -95,7 +95,7 @@ def generate_metrics():
             "heart_rate": fake.random.randint(50, 100),  # beats per minute
             "blood_oxygen": round(fake.random.uniform(95, 100), 1),  # percentage
             "steps_count": fake.random.randint(0, 20000),  # steps
-            "calories_burned": round(fake.random.uniform(100, 1000), 2),  # kcal
+            "calories_burned": round(fake.random.uniform(1000, 10000), 1),  # kcal
             "body_temperature": round(fake.random.uniform(36.0, 37.5), 1),  # Celsius
         }
         for _ in range(users_count * 2000)
@@ -147,16 +147,19 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                         font-size: 1.2em
                     }}
 
+                    body{{
+                        max-width: 400px
+                    }}
+
                     table{{
                         margin: 20px auto;
                         width: 100%;
-                        max-width: 400px
                     }}
 
                     th {{
                         font-weight: bold;
                         padding: 20px auto;
-                        text-align: center;
+                        text-align: left;
                     }}
 
                     td {{
@@ -200,8 +203,8 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                             <td> {round(metrics['total_calories_burned'] / 1000)} </td>
                             <td> {round(metrics['total_calories_burned_percent_change'])}% </td>
                         </tr><tr>
-                            <td> Body temperature </td>
-                            <td> {round(metrics['avg_body_temperature'], 1)}\u00B0C </td>
+                            <td> Body temperature (\u00B0C)</td>
+                            <td> {round(metrics['avg_body_temperature'], 1)}</td>
                             <td> {round(metrics['avg_body_temperature_percent_change'])}% </td>
                         </tr>
                     </tbody>
@@ -268,7 +271,7 @@ def agg_metrics_and_send_mail():
 
 
 with DAG(
-    dag_id= "complete_project_2",
+    dag_id= "health_metrics_dag",
     start_date = datetime(2024, 12, 2),
     schedule_interval='@daily',
     default_args= default_args,

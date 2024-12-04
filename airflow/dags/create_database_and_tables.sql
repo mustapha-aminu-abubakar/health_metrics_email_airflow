@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS health_metrics;
 CREATE DATABASE IF NOT EXISTS health_metrics DEFAULT CHARSET = 'utf8mb4';
 USE health_metrics;
 
@@ -45,7 +46,7 @@ BEGIN
             LEAD(avg_blood_oxygen) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS avg_blood_oxygen_prev,
             LEAD(total_steps_count) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS total_steps_count_prev,
             LEAD(total_calories_burned) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS total_calories_burned_prev,
-            LEAD(avg_body_temperature) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS avg_body_temperature_prev,
+            LEAD(avg_body_temperature) OVER(PARTITION BY user_id ORDER BY `date` DESC) AS avg_body_temperature_prev
         FROM metrics_by_user_daily
     ), metrics_latest AS (
         SELECT 
@@ -60,7 +61,7 @@ BEGIN
             total_calories_burned,
             (total_calories_burned - total_calories_burned_prev) / total_calories_burned_prev * 100 AS total_calories_burned_percent_change,
             avg_body_temperature,
-            (avg_body_temperature - avg_body_temperature_prev) / avg_body_temperature_prev * 100 AS avg_body_temperature_percent_change,
+            (avg_body_temperature - avg_body_temperature_prev) / avg_body_temperature_prev * 100 AS avg_body_temperature_percent_change
         FROM metrics_day_on_day
         WHERE `date` = (SELECT MAX(DATE(date_time)) FROM health_metrics.metrics)
     )
