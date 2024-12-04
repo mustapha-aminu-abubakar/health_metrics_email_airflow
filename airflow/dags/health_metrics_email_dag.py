@@ -140,17 +140,18 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
                     *{{
-                        box-sizing: border-box
+                        box-sizing: border-box;
                     }}
                     
 
                     body{{
-                        max-width: 400px
+                        max-width: 400px;
                     }}
 
                     table{{
                         margin: 20px auto;
                         width: 100%;
+                        border-collapse: collapse;
                     }}
 
                     th {{
@@ -161,6 +162,14 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
 
                     td {{
                         padding: 20px 10px;
+                    }}
+
+                    tbody tr{{
+                        border-bottom: 1px solid #ccc;
+                    }}
+
+                    thead tr{{
+                        border-bottom: 1px solid #222;
                     }}
 
                    
@@ -178,7 +187,7 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                         <tr>
                             <th> Metric </th>
                             <th> Value  </th>
-                            <th> Change <small>*</small></th>
+                            <th> Change<small>*</small></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -206,9 +215,10 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                         </tr>
                     </tbody>
                 </table>
+                <br>
                 <p>Best regards, Mustapha Aminu</p>
                 <br>
-                <p><small>Change compared to the previous day</small></p>
+                <p style="color: grey"><small>*<i>Change compared to the previous day</i></small></p>
             </body>
             </html>
         """
