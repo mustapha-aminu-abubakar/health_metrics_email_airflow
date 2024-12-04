@@ -165,26 +165,34 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                     }}
 
                     table{{
-                        margin: 10px auto;
+                        margin: 20px auto;
                         width: 100%;
                         max-width: 400px
                     }}
 
                     th {{
                         font-weight: bold;
-                        padding: 10px auto;
-                        text-align: center
+                        padding: 20px auto;
+                        text-align: center;
+                        font-size: 1.2em
                     }}
 
                     td {{
-                        padding: 10px auto;
-                        text-align: center
+                        padding: 20px auto !important;
+                        font-size: 1.2em;
                     }}
+
+                   
                 </style>
             </head>
             <body>
             <h3> Hello {metrics['first_name']}, here is a summary of your daily health metrics for {metrics['date']} </h3>
                 <table>
+                    <colgroup>
+                    <col style="width: 33.33%">
+                    <col style="width: 33.33%">
+                    <col style="width: 33.33%">
+                    </colgroup>
                     <thead>
                         <tr>
                             <th> Metric </th>
