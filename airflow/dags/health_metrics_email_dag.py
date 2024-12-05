@@ -228,7 +228,7 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
             </style>
         </head>
         <body>
-        <p> Hello <b>{metrics['first_name']}</b>, here is a summary of your daily health metrics for <b>{metrics['date']}</b> </p>
+        <p> Hello <b>{metrics['first_name']}</b>, here is a summary of your daily health metrics for <b>{metrics['date']}</b> from <a href="https://github.com/mustapha-aminu-abubakar/health_metrics_email_airflow/tree/main"> Health metrics dag</a></p>
             <table>
                 <colgroup>
                 <col style="width: 50%">
@@ -268,10 +268,18 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
                 </tbody>
             </table>
             <br>
-            <p>Best regards, Mustapha Aminu</p>
+            <p>Best regards, Mustapha Aminu <br>
+            <a href="https://github.com/mustapha-aminu-abubakar">Github</a><br>
+            <a href="https://linkedin.com/in/mustapha-aminu-a2a685229">LinkedIn</a><br>
+            </p>
+
             <br>
-            <p style="color: grey"><small>*<i>Change compared to {(datetime(*map(int, metrics['date'].split('-'))) - timedelta(days=1)).strftime('%Y-%m-%d')}</i></small></p>
-        </body>
+            <p style="color: grey"><small>*<i>Change from {(metrics['date'] - timedelta(days=1)).strftime('%Y-%m-%d')}</i></small></p>
+            <br>
+            <p style="color: grey"><small><i>Disclaimer: The data presented in this email is entirely fictitious and is intended solely for educational and demonstration purposes.</i></small></p>        
+            <br>
+            <p style="color: grey"><small><i>If you received this email in error, please disregard it and delete it immediately. No action is required on your part.</i></small></p>
+            </body>
         </html>
     """
     
