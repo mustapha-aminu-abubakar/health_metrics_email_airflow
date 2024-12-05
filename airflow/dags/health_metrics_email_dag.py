@@ -228,7 +228,7 @@ def send_email(to_email, metrics, server= "smtp.gmail.com", port= 587, username=
             </style>
         </head>
         <body>
-        <p> Hello <b>{metrics['first_name']}</b>, here is a summary of your daily health metrics for <b>{metrics['date']}</b> from <a href="https://github.com/mustapha-aminu-abubakar/health_metrics_email_airflow/tree/main"> Health metrics dag</a></p>
+        <p> Hello <b>{metrics['first_name']}</b>, here is a summary of your daily health metrics for <b>{metrics['date']}</b> from <a href="https://github.com/mustapha-aminu-abubakar/health_metrics_email_airflow/tree/main"> Health metrics dag</a></p><br>
             <table>
                 <colgroup>
                 <col style="width: 50%">
