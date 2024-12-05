@@ -1,4 +1,4 @@
-DROP DATABASE IF EXISTS health_metrics;
+-- DROP DATABASE IF EXISTS health_metrics;
 CREATE DATABASE IF NOT EXISTS health_metrics DEFAULT CHARSET = 'utf8mb4';
 USE health_metrics;
 
